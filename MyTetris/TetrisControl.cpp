@@ -369,7 +369,7 @@ bool CTetrisControl::CreateNewBox()
 	qsrand(time.msec() + time.second() * 1000);
 	int randBoxIndex = qrand() % 6;
 
-	_currentBoxMatrix = _tetrisAllSharp[0];
+	_currentBoxMatrix = _tetrisAllSharp[randBoxIndex];
 
 	CNode::NODE_POSTION postion = _currentBoxPostion;
 	for (int i = 0; i < 4; ++i)

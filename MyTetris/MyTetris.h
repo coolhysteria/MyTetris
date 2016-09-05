@@ -13,8 +13,8 @@ public:
     MyTetris(QWidget *parent = Q_NULLPTR);
 	MyTetris(CTetrisModel* model);
 
-	public slots:
-	void OnUpdate(CNode::NODE_TYPE type, CNode::NODE_POSTION postion);
+public slots:
+	void OnUpdate(CNode::NODE_TYPE type, CNode::NODE_SHARP sharp, CNode::NODE_POSTION postion);
 
 protected:
 	void paintEvent(QPaintEvent *event);
@@ -27,7 +27,4 @@ private:
 	CTetrisControl _control;
 	int _timeMoveDown;
 	int _timeNew;
-
-	CNode::NODE_POSTION _postion;
-	CNode::NODE_TYPE _type;
 };

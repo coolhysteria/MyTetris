@@ -63,6 +63,7 @@ private:
 
 	void CopyMatrix(CTetrisModel::NODE_MATRIX& from, CTetrisModel::NODE_MATRIX& to);
 	void RotateMatrix(CTetrisModel::NODE_MATRIX& to, CTetrisModel::NODE_MATRIX& from, ROTATE_DIRECTION direction);
+	void RotateMatrixEx(CTetrisModel::NODE_MATRIX& to, CTetrisModel::NODE_MATRIX& from, ROTATE_DIRECTION direction);
 	void ReleaseMatrix(CTetrisModel::NODE_MATRIX& matrix);
 
 

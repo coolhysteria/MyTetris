@@ -1,6 +1,18 @@
 #include "stdafx.h"
 #include "TetrisControl.h"
 
+static CNode::NODE_SHARP arrSharps[] = 
+{
+	CNode::NODE_SHARP::NODE_SHARP_O,
+	CNode::NODE_SHARP::NODE_SHARP_I,
+	CNode::NODE_SHARP::NODE_SHARP_T,
+	CNode::NODE_SHARP::NODE_SHARP_L,
+	CNode::NODE_SHARP::NODE_SHARP_Z,
+	CNode::NODE_SHARP::NODE_SHARP_Z,
+	CNode::NODE_SHARP::NODE_SHARP_L
+};
+
+
 static char arrBox[][4] = 
 {
 	1,1,0,0,
@@ -276,8 +288,10 @@ void CTetrisControl::FixBox(CNode::NODE_POSTION& postion, CTetrisModel::NODE_MAT
 				//NODE_MOVEABLE_BOX改成NODE_STATIC_BOX
 				if (currentBox[i][j]->GetType() == CNode::NODE_MOVEABLE_BOX)
 				{
-					_model->GetData(posCur)->SetType(CNode::NODE_STATIC_BOX);
-
+					CNode* node = _model->GetData(posCur);
+					node->SetType(CNode::NODE_STATIC_BOX);
+					node->SetBelongSharp(currentBox[i][j]->GetBelongSharp());
+					emit node->Update(node->GetType(), node->GetBelongSharp(), node->GetPostion());
 					//增加当前行的NODE_STATIC_BOX数量
 					_lineStaticBoxCounts[posCur.row] += 1;
 
@@ -288,7 +302,9 @@ void CTetrisControl::FixBox(CNode::NODE_POSTION& postion, CTetrisModel::NODE_MAT
 					if (_model->GetData(posCur)->GetType() != CNode::NODE_WALL && 
 						_model->GetData(posCur)->GetType() != CNode::NODE_STATIC_BOX)
 					{
-						_model->GetData(posCur)->SetType(CNode::NODE_BLANK);
+						CNode* node = _model->GetData(posCur);
+						node->SetType(CNode::NODE_BLANK);
+						emit node->Update(node->GetType(), node->GetBelongSharp(), node->GetPostion());
 					}
 
 				}
@@ -339,9 +355,11 @@ bool CTetrisControl::ReleaseLine(int row)
 			CNode::NODE_POSTION beforeRowPos = currentPos;
 			--beforeRowPos.row;
 			CNode::NODE_TYPE typeBeforeRow = _model->GetData(beforeRowPos)->GetType();
+			CNode::NODE_SHARP sharpBeforeRow = _model->GetData(beforeRowPos)->GetBelongSharp();
 
 			//将当前行设置为上一行
 			_model->GetData(currentPos)->SetType(typeBeforeRow);
+			_model->GetData(currentPos)->SetBelongSharp(sharpBeforeRow);
 
 		}
 
@@ -380,13 +398,14 @@ bool CTetrisControl::CreateNewBox()
 			{
 				CNode* node = _model->GetData(postion);
 				node->SetType(CNode::NODE_MOVEABLE_BOX);
-				emit node->Update(node->GetType(), node->GetPostion());
+				node->SetBelongSharp(_currentBoxMatrix[i][j]->GetBelongSharp());
+				emit node->Update(node->GetType(), node->GetBelongSharp(), node->GetPostion());
 			}
 			else if (_currentBoxMatrix[i][j]->GetType() == CNode::NODE_BLANK_BOX)
 			{
 				CNode* node = _model->GetData(postion);
 				node->SetType(CNode::NODE_BLANK_BOX);
-				emit node->Update(node->GetType(), node->GetPostion());
+				emit node->Update(node->GetType(), node->GetBelongSharp(), node->GetPostion());
 			}
 
 			++postion.column;
@@ -438,10 +457,12 @@ void CTetrisControl::CreateTempMatrix(CTetrisModel::NODE_MATRIX& matrix)
 void CTetrisControl::InitAllBoxSharp()
 {
 	CTetrisModel::NODE_MATRIX blankMatrix;
+	int sharpIndex = -1;
 	for (int i = 0; i < sizeof(arrBox) / sizeof(arrBox[0]); ++i)
 	{
 		if (i % 4 == 0)
 		{
+			++sharpIndex;
 			CreateBlankBoxMatrix(blankMatrix);
 		}
 
@@ -449,7 +470,9 @@ void CTetrisControl::InitAllBoxSharp()
 		{
 			if (arrBox[i][j] == 1)
 			{
+				//设置方块类型和形状
 				blankMatrix[i % 4][j]->SetType(CNode::NODE_MOVEABLE_BOX);
+				blankMatrix[i % 4][j]->SetBelongSharp(arrSharps[sharpIndex]);
 			}
 #ifdef TEST
 			else if (arrBox[i][j] == 0)
@@ -507,6 +530,11 @@ void CTetrisControl::RotateMatrix(CTetrisModel::NODE_MATRIX& to, CTetrisModel::N
 
 }
 
+void CTetrisControl::RotateMatrixEx(CTetrisModel::NODE_MATRIX& to, CTetrisModel::NODE_MATRIX& from, ROTATE_DIRECTION direction)
+{
+
+}
+
 void CTetrisControl::ReleaseMatrix(CTetrisModel::NODE_MATRIX& matrix)
 {
 	for (int i = 0; i < matrix.size(); ++i)
@@ -531,7 +559,8 @@ void CTetrisControl::EreaseCurrentBoxRegion(CNode::NODE_POSTION& currentPos)
 				if (node->GetType() != CNode::NODE_WALL && node->GetType() != CNode::NODE_STATIC_BOX)
 				{
 					node->SetType(CNode::NODE_BLANK);
-					emit node->Update(node->GetType(), node->GetPostion());
+					node->SetBelongSharp(CNode::NODE_SHARP_NONE);
+					emit node->Update(node->GetType(), node->GetBelongSharp(), node->GetPostion());
 				}
 			}
 
@@ -557,7 +586,8 @@ void CTetrisControl::UpdateCurrentBoxNextRegion(CNode::NODE_POSTION& nextPos, CT
 				if (node)
 				{
 					node->SetType(CNode::NODE_MOVEABLE_BOX);
-					emit node->Update(node->GetType(), node->GetPostion());
+					node->SetBelongSharp(currentBox[i][j]->GetBelongSharp());
+					emit node->Update(node->GetType(), node->GetBelongSharp(), node->GetPostion());
 				}
 			}
 			else if (currentBox[i][j]->GetType() == CNode::NODE_BLANK_BOX)
@@ -569,7 +599,7 @@ void CTetrisControl::UpdateCurrentBoxNextRegion(CNode::NODE_POSTION& nextPos, CT
 						node->GetType() != CNode::NODE_STATIC_BOX)
 					{
 						node->SetType(CNode::NODE_BLANK_BOX);
-						emit node->Update(node->GetType(), node->GetPostion());
+						emit node->Update(node->GetType(), node->GetBelongSharp(), node->GetPostion());
 					}
 				}
 			}

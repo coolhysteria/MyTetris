@@ -1,6 +1,23 @@
 #include "stdafx.h"
 #include "MyTetris.h"
 
+
+const int BLOCK_SIZE = 35; //单个方块单元的边长  
+const int MARGIN = 5; //场景边距  
+const int AREA_ROW = 22; //场景行数  
+const int AREA_COL = 14; //场景列数 
+
+static QColor arrSharpsColor[] =
+{
+	Qt::red,
+	Qt::green,
+	Qt::blue,
+	Qt::yellow,
+	Qt::darkRed,
+	Qt::darkGreen,
+	Qt::darkYellow
+};
+
 MyTetris::MyTetris(QWidget *parent)
 	: QWidget(parent)
 {
@@ -30,24 +47,27 @@ MyTetris::MyTetris(CTetrisModel* model)
 			{
 				connect(
 					node,
-					SIGNAL(Update(CNode::NODE_TYPE, CNode::NODE_POSTION)),
+					SIGNAL(Update(CNode::NODE_TYPE, CNode::NODE_SHARP, CNode::NODE_POSTION)),
 					this,
-					SLOT(OnUpdate(CNode::NODE_TYPE, CNode::NODE_POSTION)));
+					SLOT(OnUpdate(CNode::NODE_TYPE, CNode::NODE_SHARP, CNode::NODE_POSTION)));
 			}
 		}
 	}
 
-	_control.Start();
-	_timeMoveDown = startTimer(600);
 
+	_control.Start();
+	_timeMoveDown = startTimer(500);
 }
 
-void MyTetris::OnUpdate(CNode::NODE_TYPE type, CNode::NODE_POSTION postion)
+
+void MyTetris::OnUpdate(CNode::NODE_TYPE type, CNode::NODE_SHARP sharp, CNode::NODE_POSTION postion)
 {
-	qDebug("<MyTetris>OnUpdate row:%d column:%d\r\n", postion.row, postion.column);
-	_postion = postion;
-	_type = type;
-	update();
+	QRect rect(
+		QPoint(MARGIN + BLOCK_SIZE * postion.column, MARGIN + BLOCK_SIZE * postion.row),
+		QPoint(MARGIN + BLOCK_SIZE * (postion.column + 1), MARGIN + BLOCK_SIZE * (postion.row + 1))
+	);
+
+	update(rect);
 	
 }
 
@@ -55,13 +75,10 @@ void MyTetris::paintEvent(QPaintEvent *event)
 {
 	QPainter painter(this);
 
-	const int BLOCK_SIZE = 35; //单个方块单元的边长  
-	const int MARGIN = 5; //场景边距  
-	const int AREA_ROW = 22; //场景行数  
-	const int AREA_COL = 14; //场景列数 
-
+	painter.setRenderHint(QPainter::HighQualityAntialiasing);
 	painter.setBrush(QBrush(Qt::white, Qt::SolidPattern));
 	painter.drawRect(MARGIN, MARGIN, AREA_COL * BLOCK_SIZE, AREA_ROW * BLOCK_SIZE);
+
 
 	for (int i = 0; i < AREA_ROW; i++)
 	{
@@ -80,12 +97,13 @@ void MyTetris::paintEvent(QPaintEvent *event)
 				}
 				else if (node->GetType() == CNode::NODE_MOVEABLE_BOX)
 				{
-					painter.setBrush(QBrush(Qt::red, Qt::SolidPattern));
+					painter.setBrush(QBrush(arrSharpsColor[node->GetBelongSharp()], Qt::SolidPattern));
 					painter.drawRect(j * BLOCK_SIZE + MARGIN, i * BLOCK_SIZE + MARGIN, BLOCK_SIZE, BLOCK_SIZE);
+
 				}
 				else if (node->GetType() == CNode::NODE_STATIC_BOX)
 				{
-					painter.setBrush(QBrush(Qt::blue, Qt::SolidPattern));
+					painter.setBrush(QBrush(arrSharpsColor[node->GetBelongSharp()], Qt::SolidPattern));
 					painter.drawRect(j * BLOCK_SIZE + MARGIN, i * BLOCK_SIZE + MARGIN, BLOCK_SIZE, BLOCK_SIZE);
 				}
 				else if (node->GetType() == CNode::NODE_BLANK_BOX)
@@ -93,15 +111,10 @@ void MyTetris::paintEvent(QPaintEvent *event)
 					painter.setBrush(QBrush(Qt::green, Qt::SolidPattern));
 					painter.drawRect(j * BLOCK_SIZE + MARGIN, i * BLOCK_SIZE + MARGIN, BLOCK_SIZE, BLOCK_SIZE);
 				}
-
-
 			}
-
 
 		}
 	}
-
-	qDebug("<MyTetris>paintEvent\r\n");
 }
 
 void MyTetris::timerEvent(QTimerEvent *event)

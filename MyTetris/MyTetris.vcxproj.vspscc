@@ -1,0 +1,16 @@
+﻿""
+{
+"FILE_VERSION" = "9237"
+"ENLISTMENT_CHOICE" = "NEVER"
+"PROJECT_FILE_RELATIVE_PATH" = ""
+"NUMBER_OF_EXCLUDED_FILES" = "6"
+"EXCLUDED_FILE0" = "GeneratedFiles\\Release\\moc_TetrisControl.cpp"
+"EXCLUDED_FILE1" = "GeneratedFiles\\Debug\\moc_Node.cpp"
+"EXCLUDED_FILE2" = "GeneratedFiles\\Debug\\moc_TetrisModel.cpp"
+"EXCLUDED_FILE3" = "GeneratedFiles\\Release\\moc_Node.cpp"
+"EXCLUDED_FILE4" = "GeneratedFiles\\Release\\moc_TetrisModel.cpp"
+"EXCLUDED_FILE5" = "GeneratedFiles\\Debug\\moc_TetrisControl.cpp"
+"ORIGINAL_PROJECT_FILE_PATH" = ""
+"NUMBER_OF_NESTED_PROJECTS" = "0"
+"SOURCE_CONTROL_SETTINGS_PROVIDER" = "PROJECT"
+}

@@ -2,6 +2,8 @@
 #include <QObject>
 #include "TetrisModel.h"
 #include "Node.h"
+#include "BGMPlayer.h"
+#include "QSoundEffect"
 
 class CTetrisControl : public QObject
 {
@@ -21,7 +23,22 @@ public:
 	void Stop();
 	void Restart();
 	bool IsStart() const;
+
+	bool SetStartBGMWavePath(char* path);
+	bool SetMoveBGMWavePath(char* path);
+	bool SetFixedBGMWavePath(char* path);
+	bool ReleasedOverBGMWavePath(char* path);
+
 	void SetModel(CTetrisModel *model);
+
+	
+
+signals:
+	//ø™ º±≥æ∞“Ù¿÷
+	void StartBGM();
+	void MoveBGM();
+	void FixedBGM();
+	void ReleasedOverBGM();
 
 
 public slots:
@@ -56,6 +73,13 @@ private:
 	vector<int> _lineStaticBoxCounts;
 
 	bool _isStarted;
+
+	CBGMPlayer _bgmPlayerBackgound;
+	CBGMPlayer _bgmPlayerGameStart;
+	CBGMPlayer _bgmPlayerRotateBox;
+	CBGMPlayer _bgmPlayerFixBox;
+	CBGMPlayer _bgmPlayerReleaseBox;
+	QSoundEffect effect;
 
 	void CreateBlankBoxMatrix(CTetrisModel::NODE_MATRIX& matrix);
 	void CreateTempMatrix(CTetrisModel::NODE_MATRIX& matrix);

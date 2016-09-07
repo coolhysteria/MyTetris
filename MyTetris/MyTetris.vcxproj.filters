@@ -86,6 +86,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_TetrisModel.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="BGMPlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_BGMPlayer.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_BGMPlayer.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -112,6 +121,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="TetrisModel.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="BGMPlayer.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

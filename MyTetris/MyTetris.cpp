@@ -121,7 +121,6 @@ void MyTetris::timerEvent(QTimerEvent *event)
 {
 	if (event->timerId() == _timeMoveDown)
 	{
-		//_control.Rotate(CTetrisControl::ROTATE_RIGHT);
 		_control.MoveDown();
 	}
 }

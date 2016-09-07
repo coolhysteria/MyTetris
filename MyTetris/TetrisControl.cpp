@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "TetrisControl.h"
-
+#include <QSoundEffect>  
 static CNode::NODE_SHARP arrSharps[] = 
 {
 	CNode::NODE_SHARP::NODE_SHARP_O,
@@ -65,19 +65,26 @@ CTetrisControl::~CTetrisControl(void)
 
 bool CTetrisControl::Start()
 {
+	effect.setSource(QUrl::fromLocalFile("./wav/back.wav"));
+	effect.setLoopCount(QSoundEffect::Infinite);
+	effect.setVolume(0.6f);
+	effect.play();
+
+
+	_bgmPlayerGameStart.Init();
+	_bgmPlayerRotateBox.Init();
+	_bgmPlayerFixBox.Init();
+	_bgmPlayerReleaseBox.Init();
+
+	_bgmPlayerGameStart.PlayWav(QString("./wav/ReadyGo.WAV"));
+
+
 	InitAllBoxSharp();
-
-
-	_lineStaticBoxCounts.clear();
-	for (int i = 0; i < _model->GetRows(); ++i)
-	{
-		_lineStaticBoxCounts.push_back(0);
-	}
-
+	
 	CreateNewBox();
 
-
 	_isStarted = true;
+
 
 	return true;
 }
@@ -85,6 +92,26 @@ bool CTetrisControl::Start()
 bool CTetrisControl::IsStart() const
 {
 	return _isStarted;
+}
+
+bool CTetrisControl::SetStartBGMWavePath(char* path)
+{
+	return true;
+}
+
+bool CTetrisControl::SetMoveBGMWavePath(char* path)
+{
+	return true;
+}
+
+bool CTetrisControl::SetFixedBGMWavePath(char* path)
+{
+	return true;
+}
+
+bool CTetrisControl::ReleasedOverBGMWavePath(char* path)
+{
+	return true;
 }
 
 void CTetrisControl::Stop()
@@ -108,6 +135,8 @@ bool CTetrisControl::MoveLeft()
 	{
 		return true;
 	}
+
+	//_bgmPlayerRotateBox.PlayWav(QString("./wav/transform.wav"));
 
 	CNode::NODE_POSTION nextPostion;
  	nextPostion = _currentBoxPostion;
@@ -139,6 +168,8 @@ bool CTetrisControl::MoveRight()
 		return true;
 	}
 
+	//_bgmPlayerRotateBox.PlayWav(QString("./wav/transform.wav"));
+
 	CNode::NODE_POSTION nextPostion;
 	nextPostion = _currentBoxPostion;
 	nextPostion.column += 1;
@@ -168,6 +199,8 @@ bool CTetrisControl::MoveDown()
 	{
 		return true;
 	}
+
+	//_bgmPlayerRotateBox.PlayWav(QString("./wav/transform.wav"));
 
 	CNode::NODE_POSTION nextPostion;
 	nextPostion = _currentBoxPostion;
@@ -207,6 +240,8 @@ bool CTetrisControl::Rotate(ROTATE_DIRECTION direction)
 	{
 		return true;
 	}
+
+	_bgmPlayerRotateBox.PlayWav(QString("./wav/transform.wav"));
 
 	//复制当前矩阵
 	CTetrisModel::NODE_MATRIX copidMatrix;
@@ -316,6 +351,7 @@ void CTetrisControl::FixBox(CNode::NODE_POSTION& postion, CTetrisModel::NODE_MAT
 		posCur.column = postion.column;
 		++posCur.row;
 	}
+
 }
 
 
@@ -333,6 +369,15 @@ int CTetrisControl::ReleaseLines(CNode::NODE_POSTION& postion, CTetrisModel::NOD
 			++totalFullLines;
 			ReleaseLine(iRow);
 		}
+	}
+
+	if (totalFullLines > 0)
+	{
+		//_bgmPlayerFixBox.PlayWav(QString("./wav/fadelayer.wav"));
+	}
+	else
+	{
+		_bgmPlayerReleaseBox.PlayWav(QString("./wav/fixup.wav"));
 	}
 
 	return totalFullLines;
@@ -358,8 +403,10 @@ bool CTetrisControl::ReleaseLine(int row)
 			CNode::NODE_SHARP sharpBeforeRow = _model->GetData(beforeRowPos)->GetBelongSharp();
 
 			//将当前行设置为上一行
-			_model->GetData(currentPos)->SetType(typeBeforeRow);
-			_model->GetData(currentPos)->SetBelongSharp(sharpBeforeRow);
+			CNode* node = _model->GetData(currentPos);
+			node->SetType(typeBeforeRow);
+			node->SetBelongSharp(sharpBeforeRow);
+			emit node->Update(node->GetType(), node->GetBelongSharp(), node->GetPostion());
 
 		}
 
@@ -368,12 +415,14 @@ bool CTetrisControl::ReleaseLine(int row)
 		--iRow;
 	}
 
+	_bgmPlayerFixBox.PlayWav(QString("./wav/fadelayer.wav"));
 
 	return true;
 }
 
 bool CTetrisControl::CreateNewBox()
 {
+
 	int rows = _model->GetRows();
 	int columns = _model->GetColumns();
 
@@ -486,6 +535,15 @@ void CTetrisControl::InitAllBoxSharp()
 		{
 			_tetrisAllSharp.push_back(blankMatrix);
 		}
+	}
+
+
+
+
+	_lineStaticBoxCounts.clear();
+	for (int i = 0; i < _model->GetRows(); ++i)
+	{
+		_lineStaticBoxCounts.push_back(0);
 	}
 
 
